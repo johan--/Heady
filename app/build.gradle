@@ -37,6 +37,4 @@ dependencies {
     implementation "com.android.support:recyclerview-v7:${rootProject.ext.supportLibVersion}"
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.31'
-    implementation 'com.jakewharton:butterknife:8.8.1'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
 }

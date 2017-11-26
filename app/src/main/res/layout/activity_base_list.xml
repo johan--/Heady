@@ -1,17 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/rootView"
+    android:id="@+id/coordinatorLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <include layout="@layout/layout_tool_bar" />
-
-    <com.heady.util.MultiStateRecyclerView
-        android:id="@+id/recycler_view"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/toolbar"
-        tools:ignore="UnknownIdInLayout" />
+        android:layout_height="match_parent">
 
-</RelativeLayout>
+        <include layout="@layout/layout_tool_bar" />
+
+        <com.heady.util.MultiStateView
+            android:id="@+id/multiStateView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/toolbar"
+            app:msv_emptyView="@layout/view_state_empty"
+            app:msv_errorView="@layout/view_state_error"
+            app:msv_loadingView="@layout/view_state_loading"
+            app:msv_viewState="loading"
+            tools:ignore="UnknownIdInLayout">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:padding="@dimen/padding_small" />
+
+        </com.heady.util.MultiStateView>
+    </RelativeLayout>
+
+</android.support.design.widget.CoordinatorLayout>

@@ -13,7 +13,7 @@ public interface DbTransaction<Model extends RealmObject> {
 
     void setData(List<Model> data);
 
-    Model findModel(String permalink);
+    Model findModel(int id);
 
     void deleteData();
 

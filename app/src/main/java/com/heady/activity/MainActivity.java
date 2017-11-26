@@ -1,116 +1,78 @@
 package com.heady.activity;
 
-import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.GridLayoutManager;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
-import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.heady.R;
 import com.heady.adapter.ProductsAdapter;
-import com.heady.util.NetworkUtil;
-import com.heady.util.PlaceHolderView;
 import com.heady.util.logger.Log;
 import com.heady.util.realm.CategoryManager;
 import com.heady.util.realm.DbType;
 import com.heady.util.realm.RankingManager;
-import com.network.api.HeadyApi;
-import com.network.interfaces.CommonResponseListener;
-import com.network.model.HeadyModel;
+import com.network.model.Categories;
 import com.network.model.Products;
-import com.network.utils.RetrofitConstants;
-import com.network.utils.error.RetrofitException;
 
 import java.util.List;
 
-import io.realm.RealmResults;
+import io.realm.RealmList;
 
 /**
  * Created by Yogi.
  */
 
-public class MainActivity extends BaseListActivity<ProductsAdapter> implements CommonResponseListener<HeadyModel> {
-    private HeadyApi mHeadyApi;
-    private RealmResults<Products> mProductList;
+public class MainActivity extends BaseListActivity {
+    private RealmList<Products> mProductList;
     private RankingManager rankingManager;
     private CategoryManager categoryManager;
     private int sortCheckedItem = -1;
+    private int categoryId;
 
-    public static void start(Activity activity, boolean finishPreviousActivity) {
-        if (!(activity instanceof MainActivity)) {
-            Intent intent = new Intent(activity, MainActivity.class);
-            activity.startActivity(intent);
-            if (finishPreviousActivity) {
-                activity.finish();
-            }
+    public static void start(Context context, int categoryId) {
+        if (!(context instanceof MainActivity)) {
+            Intent intent = new Intent(context, MainActivity.class);
+            intent.putExtra(Categories.ID, categoryId);
+            context.startActivity(intent);
         }
     }
 
     @Override
-    protected void initApi() {
-        mHeadyApi = new HeadyApi(this);
+    protected void getIntentData(Intent intent) {
+        super.getIntentData(intent);
+        Bundle bundle = intent.getExtras();
+        if (bundle != null) {
+            categoryId = bundle.getInt(Categories.ID);
+        }
     }
+
 
     @Override
     protected void setupRealm() {
         rankingManager = new RankingManager(DbType.Heady.RANKING);
         categoryManager = new CategoryManager(DbType.Heady.CATEGORIES);
-        mProductList = categoryManager.getProducts();
+        mProductList = categoryManager.getCategoryProducts(categoryId);
     }
 
     @Override
-    protected void callServer() {
-        if (NetworkUtil.isConnectedToInternet(this)) {
-            mRecyclerView.setView(PlaceHolderView.LOADING);
-            mHeadyApi.getProducts(RetrofitConstants.RequestMode.GET_PRODUCTS);
+    protected void setupAdapter() {
+        if (mProductList != null && mProductList.size() > 0) {
+            hideProgress();
+            mRecyclerView.setAdapter(new ProductsAdapter(mProductList));
         } else {
-            mRecyclerView.setView(PlaceHolderView.INTERNET);
+            setEmptyViewData("No Products found under this Category", R.drawable.ic_placeholder);
         }
     }
 
-    @Override
-    public ProductsAdapter getAdapterInstance() {
-//        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-        return new ProductsAdapter(mProductList);
-    }
 
     @Override
-    public String getToolBarTitle() {
-        return "Heady";
+    protected String getToolBarTitle() {
+        return "Show Product";
     }
 
-    @Override
-    public void onSuccess(int pageNumber, final HeadyModel headyModel, int requestMode) {
-        Log.d();
-        mRecyclerView.setView(PlaceHolderView.CONTENT);
-        rankingManager.setData(headyModel.rankings);
-        categoryManager.setData(headyModel.categories);
-    }
-
-    @Override
-    public void onNoContent(int pageNumber, int requestMode) {
-        mRecyclerView.setView(PlaceHolderView.NO_DATA);
-    }
-
-    @Override
-    public void onFailure(int pageNumber, String message, RetrofitException exception, int requestMode) {
-        Log.e(message);
-        mRecyclerView.setView(PlaceHolderView.ERROR, message);
-    }
-
-    @Override
-    public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
-
-    }
-
-    @Override
-    public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -121,9 +83,6 @@ public class MainActivity extends BaseListActivity<ProductsAdapter> implements C
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_filter:
-
-                break;
             case R.id.action_sort:
                 showSortDialog();
                 break;
@@ -143,8 +102,9 @@ public class MainActivity extends BaseListActivity<ProductsAdapter> implements C
                 sortCheckedItem = i;
                 Log.e(rankingTitles.get(i));
                 dialog.dismiss();
-                mProductList = categoryManager.getProductsSorted("");
-                mAdapter.notifyDataSetChanged();
+//                mProductList = categoryManager.getProductsSorted("");
+//                mAdapter.notifyDataSetChanged();
+                // TODO: 27/11/2017  
             }
         });
 
@@ -152,5 +112,13 @@ public class MainActivity extends BaseListActivity<ProductsAdapter> implements C
         alertDialog.show();
     }
 
+    @Override
+    protected void initApi() {
+    }
+
+    @Override
+    protected void callServer() {
+
+    }
 
 }

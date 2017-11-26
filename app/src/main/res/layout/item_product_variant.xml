@@ -38,12 +38,23 @@
         android:id="@+id/priceTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_small"
         android:textColor="@color/primary_text"
         android:textSize="@dimen/text_size_normal"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/colorTextView"
         tools:text="Rs. 5000" />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/taxTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_very_small"
+        android:textColor="@color/secondary_text"
+        android:textSize="@dimen/text_size_small"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/priceTextView"
+        tools:text="+ VAT : 500" />
 
 </android.support.constraint.ConstraintLayout>

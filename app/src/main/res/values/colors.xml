@@ -12,6 +12,7 @@
     <color name="viewpager_bg">#000000</color>
     <color name="text_white">#FFFFFF</color>
     <color name="gray_bg">#EEEEEE</color>
+    <color name="text_white_grey">#FAFAFA</color>
 
 
 </resources>

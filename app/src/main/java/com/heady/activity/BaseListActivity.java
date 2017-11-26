@@ -1,36 +1,40 @@
 package com.heady.activity;
 
-import android.os.Bundle;
-import android.support.annotation.LayoutRes;
-import android.support.annotation.Nullable;
+import android.support.annotation.DrawableRes;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.view.ViewStub;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 
-import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.heady.R;
-import com.heady.util.MultiStateRecyclerView;
-import com.heady.util.logger.Log;
-
-import butterknife.BindView;
+import com.heady.util.ItemOffsetDecoration;
+import com.heady.util.MultiStateView;
 
 /**
  * Created by Yogi.
  */
 
-public abstract class BaseListActivity<Adapter extends BaseQuickAdapter> extends BaseActivity implements MultiStateRecyclerView.LoadMoreListener,
-        MultiStateRecyclerView.RefreshListener,
-        MultiStateRecyclerView.RetryListener,
-        BaseQuickAdapter.OnItemClickListener,
-        BaseQuickAdapter.OnItemChildClickListener {
-    @BindView(R.id.recycler_view)
-    protected MultiStateRecyclerView mRecyclerView;
-    @BindView(R.id.rootView)
-    protected View mRootView;
-    protected Adapter mAdapter;
-    private boolean isServerCalled;
+public abstract class BaseListActivity extends BaseActivity {
+
+    protected MultiStateView mMultiStateView;
+    // error views
+    protected Button mErrorRetryButton;
+    protected CoordinatorLayout mCoordinatorLayout;
+    // views inflated by mMultiStateView
+    protected View mErrorView;
+    protected View mEmptyView;
+    protected View mLoadingView;
+    protected RecyclerView mRecyclerView;
+    private TextView mErrorTextView;
+    // empty views
+    private ImageView mEmptyImageView;
+    private TextView mEmptyTextView;
 
     @Override
     public int getLayoutId() {
@@ -47,67 +51,74 @@ public abstract class BaseListActivity<Adapter extends BaseQuickAdapter> extends
         }
     }
 
+
+    protected abstract String getToolBarTitle();
+
     @Override
     protected void setupView() {
+        mCoordinatorLayout = findViewById(R.id.coordinatorLayout);
+
+        mMultiStateView = findViewById(R.id.multiStateView);
+
+        // init error and empty view
+        mErrorView = mMultiStateView.getView(MultiStateView.VIEW_STATE_ERROR);
+        mEmptyView = mMultiStateView.getView(MultiStateView.VIEW_STATE_EMPTY);
+        mLoadingView = mMultiStateView.getView(MultiStateView.VIEW_STATE_LOADING);
+
+        // init views from loading, error and empty view
+        mErrorTextView = mErrorView.findViewById(R.id.textViewError);
+        mErrorRetryButton = mErrorView.findViewById(R.id.buttonRetryError);
+        mErrorRetryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                callServer();
+            }
+        });
+
+        mEmptyImageView = mEmptyView.findViewById(R.id.imageViewEmpty);
+        mEmptyTextView = mEmptyView.findViewById(R.id.textViewEmpty);
+
+        mRecyclerView = findViewById(R.id.recycler_view);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.addItemDecoration(new ItemOffsetDecoration(this, R.dimen.padding_small));
         setupAdapter();
     }
 
+    protected abstract void setupAdapter();
 
-    @Override
-    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        Log.d();
-        fetchData();
+    /**
+     * connection failed
+     */
+    protected void setErrorMessage(String errorMessage) {
+        mMultiStateView.setViewState(MultiStateView.VIEW_STATE_ERROR);
+        mErrorTextView.setText(errorMessage);
     }
 
-
-    private void setupAdapter() {
-        if (mAdapter == null) {
-            mAdapter = getAdapterInstance();
-        }
-        mRecyclerView.setLoadMoreListener(this);
-        mRecyclerView.setRefreshListener(this);
-        mRecyclerView.setRetryListener(this);
-        mRecyclerView.setAdapter(mAdapter, isLoadMoreEnabled());
-        mAdapter.setOnItemClickListener(this);
-        mAdapter.setOnItemChildClickListener(this);
+    /**
+     * set empty view data
+     */
+    protected void setEmptyViewData(String message, @DrawableRes int drawable) {
+        mMultiStateView.setViewState(MultiStateView.VIEW_STATE_EMPTY);
+        mEmptyTextView.setText(message);
+        if (drawable != 0)
+            mEmptyImageView.setImageResource(drawable);
     }
 
-    public abstract Adapter getAdapterInstance();
-
-    public abstract String getToolBarTitle();
-
-    protected boolean isLoadMoreEnabled() {
-        return false;
+    /**
+     * hide progress
+     */
+    protected void hideProgress() {
+        mMultiStateView.setViewState(MultiStateView.VIEW_STATE_CONTENT);
     }
 
-    @Override
-    public void onLoadMore(int pageNumber) {
-        callServer();
-    }
-
-    @Override
-    public void onRefresh() {
-        mRecyclerView.resetPageNumber();
-        callServer();
-    }
-
-    @Override
-    public void onRetry() {
-        callServer();
-    }
-
-    private void fetchData() {
-        if (mAdapter == null) {
-            throw new RuntimeException("initialise the Adapter first");
-        }
-        if (mRecyclerView.getPageNumber() == 1 && !isServerCalled) {
-            callServer();
-            isServerCalled = true;
-        }
+    /**
+     * show progress
+     */
+    protected void showProgress() {
+        mMultiStateView.setViewState(MultiStateView.VIEW_STATE_LOADING);
     }
 
     protected void showSnackBar(String message) {
-        Snackbar.make(mRootView, message, Snackbar.LENGTH_LONG).show();
+        Snackbar.make(mCoordinatorLayout, message, Snackbar.LENGTH_LONG).show();
     }
 }

@@ -26,6 +26,11 @@ public class RankingManager extends Manager<Rankings> {
     }
 
     @Override
+    public void setData(Rankings data) {
+
+    }
+
+    @Override
     public void setData(final List<Rankings> data) {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
@@ -36,12 +41,7 @@ public class RankingManager extends Manager<Rankings> {
     }
 
     @Override
-    public void setData(Rankings data) {
-
-    }
-
-    @Override
-    public Rankings findModel(String permalink) {
+    public Rankings findModel(int permalink) {
         return realm.where(Rankings.class).equalTo(Rankings.RANKING, permalink).findFirst();
     }
 

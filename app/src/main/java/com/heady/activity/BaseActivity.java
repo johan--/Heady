@@ -1,11 +1,10 @@
 package com.heady.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-
-import butterknife.ButterKnife;
 
 /**
  * Created by Yogi.
@@ -18,11 +17,22 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(getLayoutId());
-        ButterKnife.bind(this);
+        getIntentData(getIntent());
         setToolBar();
         initApi();
         setupRealm();
         setupView();
+
+    }
+
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        callServer();
+    }
+
+    protected void getIntentData(Intent intent) {
+
     }
 
 
