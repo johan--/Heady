@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
 import butterknife.ButterKnife;
-import io.realm.Realm;
 
 /**
  * Created by Yogi.
@@ -14,7 +13,6 @@ import io.realm.Realm;
 
 public abstract class BaseActivity extends AppCompatActivity {
 
-    protected Realm realm;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -25,18 +23,6 @@ public abstract class BaseActivity extends AppCompatActivity {
         initApi();
         setupRealm();
         setupView();
-    }
-
-
-    @Override
-    public void onDestroy() {
-        if (realm != null && !realm.isClosed()) {
-            if (realm.isInTransaction()) {
-                realm.cancelTransaction();
-            }
-            realm.close();
-        }
-        super.onDestroy();
     }
 
 

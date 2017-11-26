@@ -5,15 +5,17 @@ import android.support.annotation.StringDef;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import static com.heady.util.realm.DbType.Heady.PRODUCTS;
+import static com.heady.util.realm.DbType.Heady.CATEGORIES;
+import static com.heady.util.realm.DbType.Heady.RANKING;
 
 /**
  * Created by Yogi.
  */
 @Retention(RetentionPolicy.SOURCE)
 public @interface DbType {
-    @StringDef({PRODUCTS})
+    @StringDef({CATEGORIES, RANKING})
     @interface Heady {
-        String PRODUCTS = "products";
+        String CATEGORIES = "categories";
+        String RANKING = "ranking";
     }
 }

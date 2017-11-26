@@ -1,8 +1,12 @@
 package com.heady.activity;
 
-import android.support.annotation.NonNull;
+import android.app.Activity;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
@@ -11,20 +15,18 @@ import com.heady.adapter.ProductsAdapter;
 import com.heady.util.NetworkUtil;
 import com.heady.util.PlaceHolderView;
 import com.heady.util.logger.Log;
+import com.heady.util.realm.CategoryManager;
 import com.heady.util.realm.DbType;
-import com.heady.util.realm.RealmManager;
+import com.heady.util.realm.RankingManager;
 import com.network.api.HeadyApi;
 import com.network.interfaces.CommonResponseListener;
 import com.network.model.HeadyModel;
 import com.network.model.Products;
-import com.network.model.Rankings;
 import com.network.utils.RetrofitConstants;
 import com.network.utils.error.RetrofitException;
 
 import java.util.List;
 
-import butterknife.OnClick;
-import io.realm.Realm;
 import io.realm.RealmResults;
 
 /**
@@ -34,6 +36,19 @@ import io.realm.RealmResults;
 public class MainActivity extends BaseListActivity<ProductsAdapter> implements CommonResponseListener<HeadyModel> {
     private HeadyApi mHeadyApi;
     private RealmResults<Products> mProductList;
+    private RankingManager rankingManager;
+    private CategoryManager categoryManager;
+    private int sortCheckedItem = -1;
+
+    public static void start(Activity activity, boolean finishPreviousActivity) {
+        if (!(activity instanceof MainActivity)) {
+            Intent intent = new Intent(activity, MainActivity.class);
+            activity.startActivity(intent);
+            if (finishPreviousActivity) {
+                activity.finish();
+            }
+        }
+    }
 
     @Override
     protected void initApi() {
@@ -42,8 +57,9 @@ public class MainActivity extends BaseListActivity<ProductsAdapter> implements C
 
     @Override
     protected void setupRealm() {
-        realm = RealmManager.instance(DbType.Heady.PRODUCTS);
-        mProductList = realm.where(Products.class).findAll();
+        rankingManager = new RankingManager(DbType.Heady.RANKING);
+        categoryManager = new CategoryManager(DbType.Heady.CATEGORIES);
+        mProductList = categoryManager.getProducts();
     }
 
     @Override
@@ -57,11 +73,6 @@ public class MainActivity extends BaseListActivity<ProductsAdapter> implements C
     }
 
     @Override
-    protected int getTopLayoutId() {
-        return R.layout.layout_filter;
-    }
-
-    @Override
     public ProductsAdapter getAdapterInstance() {
         mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         return new ProductsAdapter(mProductList);
@@ -72,37 +83,12 @@ public class MainActivity extends BaseListActivity<ProductsAdapter> implements C
         return "Heady";
     }
 
-    @OnClick({R.id.filterButton, R.id.sortButton})
-    protected void setOnclickEvent(View view) {
-        switch (view.getId()) {
-            case R.id.filterButton:
-                break;
-            case R.id.sortButton:
-                showSortDialog();
-                break;
-        }
-    }
-
-    private void showSortDialog() {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Sort By");
-        List<Rankings> titles = realm.where(Rankings.class).findAll();
-        for (int i = 0; i < titles.size(); i++) {
-            Log.e(titles.get(i).ranking);
-        }
-//        builder.setSingleChoiceItems()
-    }
-
-
     @Override
     public void onSuccess(int pageNumber, final HeadyModel headyModel, int requestMode) {
+        Log.d();
         mRecyclerView.setView(PlaceHolderView.CONTENT);
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(@NonNull Realm realm) {
-                realm.copyToRealmOrUpdate(headyModel.categories);
-            }
-        });
+        rankingManager.setData(headyModel.rankings);
+        categoryManager.setData(headyModel.categories);
     }
 
     @Override
@@ -116,7 +102,6 @@ public class MainActivity extends BaseListActivity<ProductsAdapter> implements C
         mRecyclerView.setView(PlaceHolderView.ERROR, message);
     }
 
-
     @Override
     public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
 
@@ -126,4 +111,46 @@ public class MainActivity extends BaseListActivity<ProductsAdapter> implements C
     public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
 
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_home, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_filter:
+
+                break;
+            case R.id.action_sort:
+                showSortDialog();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void showSortDialog() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Sort By");
+        final List<String> rankingTitles = rankingManager.getRankingTitles();
+        CharSequence[] array = new CharSequence[rankingTitles.size()];
+        rankingTitles.toArray(array);
+        builder.setSingleChoiceItems(array, sortCheckedItem, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int i) {
+                sortCheckedItem = i;
+                Log.e(rankingTitles.get(i));
+                dialog.dismiss();
+                mProductList = categoryManager.getProductsSorted("");
+                mAdapter.notifyDataSetChanged();
+            }
+        });
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+
 }

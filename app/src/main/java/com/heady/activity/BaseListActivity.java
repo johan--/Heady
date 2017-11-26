@@ -12,6 +12,7 @@ import android.view.ViewStub;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.heady.R;
 import com.heady.util.MultiStateRecyclerView;
+import com.heady.util.logger.Log;
 
 import butterknife.BindView;
 
@@ -24,9 +25,6 @@ public abstract class BaseListActivity<Adapter extends BaseQuickAdapter> extends
         MultiStateRecyclerView.RetryListener,
         BaseQuickAdapter.OnItemClickListener,
         BaseQuickAdapter.OnItemChildClickListener {
-    @Nullable
-    @BindView(R.id.view_stub)
-    protected ViewStub mViewStub;
     @BindView(R.id.recycler_view)
     protected MultiStateRecyclerView mRecyclerView;
     @BindView(R.id.rootView)
@@ -51,13 +49,6 @@ public abstract class BaseListActivity<Adapter extends BaseQuickAdapter> extends
 
     @Override
     protected void setupView() {
-        @LayoutRes int topLayoutId = getTopLayoutId();
-        if (topLayoutId != 0) {
-            if (mViewStub != null) {
-                mViewStub.setLayoutResource(topLayoutId);
-                mViewStub.inflate();
-            }
-        }
         setupAdapter();
     }
 
@@ -65,6 +56,7 @@ public abstract class BaseListActivity<Adapter extends BaseQuickAdapter> extends
     @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
+        Log.d();
         fetchData();
     }
 
@@ -81,15 +73,12 @@ public abstract class BaseListActivity<Adapter extends BaseQuickAdapter> extends
         mAdapter.setOnItemChildClickListener(this);
     }
 
-    @LayoutRes
-    protected abstract int getTopLayoutId();
-
     public abstract Adapter getAdapterInstance();
 
     public abstract String getToolBarTitle();
 
     protected boolean isLoadMoreEnabled() {
-        return true;
+        return false;
     }
 
     @Override
