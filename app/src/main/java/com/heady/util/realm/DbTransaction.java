@@ -11,17 +11,9 @@ public interface DbTransaction<Model extends RealmObject> {
 
     void setData(Model data);
 
-    RealmResults<Model> getDataAsync();
-
-    void setDataAsync(Model data);
-
     void setData(List<Model> data);
 
-    void setDataAsync(List<Model> data);
-
     Model findModel(String permalink);
-
-    Model findModelAsync(String permalink);
 
     void deleteData();
 

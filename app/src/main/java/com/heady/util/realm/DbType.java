@@ -8,6 +8,7 @@ import java.lang.annotation.RetentionPolicy;
 import static com.heady.util.realm.DbType.Heady.CATEGORIES;
 import static com.heady.util.realm.DbType.Heady.RANKING;
 
+
 /**
  * Created by Yogi.
  */

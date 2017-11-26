@@ -1,14 +1,13 @@
 package com.network.model;
 
-import java.util.List;
+import io.realm.RealmList;
 
 /**
  * Created by Yogi.
  */
 
 public class HeadyModel {
-
-    public List<Categories> categories;
-    public List<Rankings> rankings;
+    public RealmList<Categories> categories;
+    public RealmList<Rankings> rankings;
 
 }

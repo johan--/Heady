@@ -43,32 +43,7 @@ public class CategoryManager extends Manager<Categories> {
     }
 
     @Override
-    public RealmResults<Categories> getDataAsync() {
-        return realm.where(Categories.class).findAllAsync();
-    }
-
-    @Override
-    public void setDataAsync(final List<Categories> data) {
-        realm.executeTransactionAsync(new Realm.Transaction() {
-            @Override
-            public void execute(@NonNull Realm realm) {
-                realm.copyToRealmOrUpdate(data);
-            }
-        });
-    }
-
-    @Override
-    public void setDataAsync(Categories data) {
-
-    }
-
-    @Override
     public Categories findModel(String permalink) {
-        return realm.where(Categories.class).equalTo(Categories.ID, permalink).findFirst();
-    }
-
-    @Override
-    public Categories findModelAsync(String permalink) {
         return realm.where(Categories.class).equalTo(Categories.ID, permalink).findFirst();
     }
 

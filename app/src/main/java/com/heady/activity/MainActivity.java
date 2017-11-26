@@ -74,7 +74,7 @@ public class MainActivity extends BaseListActivity<ProductsAdapter> implements C
 
     @Override
     public ProductsAdapter getAdapterInstance() {
-        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+//        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         return new ProductsAdapter(mProductList);
     }
 

@@ -26,7 +26,7 @@ public class HeadyApi {
         call.enqueue(new RetrofitCallbackListener<HeadyModel>() {
             @Override
             public void success(HeadyModel response) {
-                if (response == null || response.categories == null) {
+                if (response == null ) {
                     RetrofitException retrofitException = RetrofitException.nullResponse();
                     mListener.onFailure(-1, retrofitException.getMessage(), retrofitException, requestMode);
                     return;

@@ -8,4 +8,5 @@
     <string name="something_went_wrong">Whoa! Something bad happened. No fear. Just try again. :)</string>
     <string name="filter">Filter</string>
     <string name="sort">Sort</string>
+    <string name="select_size">Select Size &amp; Color</string>
 </resources>

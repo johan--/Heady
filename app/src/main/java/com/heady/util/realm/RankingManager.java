@@ -41,33 +41,8 @@ public class RankingManager extends Manager<Rankings> {
     }
 
     @Override
-    public RealmResults<Rankings> getDataAsync() {
-        return realm.where(Rankings.class).findAllAsync();
-    }
-
-    @Override
-    public void setDataAsync(final List<Rankings> data) {
-        realm.executeTransactionAsync(new Realm.Transaction() {
-            @Override
-            public void execute(@NonNull Realm realm) {
-                realm.copyToRealmOrUpdate(data);
-            }
-        });
-    }
-
-    @Override
-    public void setDataAsync(Rankings data) {
-
-    }
-
-    @Override
     public Rankings findModel(String permalink) {
         return realm.where(Rankings.class).equalTo(Rankings.RANKING, permalink).findFirst();
-    }
-
-    @Override
-    public Rankings findModelAsync(String permalink) {
-        return realm.where(Rankings.class).equalTo(Rankings.RANKING, permalink).findFirstAsync();
     }
 
     @Override
