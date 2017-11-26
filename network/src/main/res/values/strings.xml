@@ -1,0 +1,11 @@
+<resources>
+    <string name="something_went_wrong">Whoa! Something bad happened. No fear. Just try again. :)</string>
+    <string name="no_internet_connection">Oops..Idle internet! Connect and please try again.</string>
+    <string name="no_content">No content available.</string>
+    <string name="time_out_message">Request timed out. Try again please.</string>
+    <string name="unauthorized">Your session has been expired. Please login again.</string>
+    <string name="request_cancelled">Request cancelled.</string>
+    <string name="server_error">Could not connect to server. Please try again.</string>
+    <string name="bad_request_error">Bad Request! Please try again.</string>
+    <string name="no_more_date_available">That\'s all we got here!</string>
+</resources>

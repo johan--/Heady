@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/noInternetConnectionWrapper"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:descendantFocusability="blocksDescendants"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/imageViewError"
+        android:layout_width="wrap_content"
+        android:layout_height="100dp"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_error_network"
+        android:tint="@color/gray_icons"
+        tools:ignore="ContentDescription" />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/textViewError"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:padding="@dimen/padding_large"
+        android:text="@string/no_internet_connection"
+        android:textColor="@color/secondary_text"
+        android:textSize="@dimen/text_size_large" />
+
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/buttonRetryError"
+        android:layout_width="wrap_content"
+        android:layout_height="35dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/padding_large"
+        android:background="@drawable/button_retry"
+        android:padding="@dimen/padding_normal"
+        android:text="@string/tap_to_retry"
+        android:textColor="@color/text_white" />
+</LinearLayout>

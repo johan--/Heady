@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Heady</string>
+
+    <string name="no_internet_connection">Please check your internet connection.</string>
+    <string name="tap_to_retry">Tap to retry</string>
+    <string name="no_data_found">Currently we don\\\'t have anything here!</string>
+    <string name="no_more_data">That\'s all we got here.</string>
+    <string name="something_went_wrong">Whoa! Something bad happened. No fear. Just try again. :)</string>
+    <string name="filter">Filter</string>
+    <string name="sort">Sort</string>
+</resources>
