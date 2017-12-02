@@ -51,8 +51,8 @@ public abstract class BaseListActivity extends BaseActivity {
         }
     }
 
-
     protected abstract String getToolBarTitle();
+
 
     @Override
     protected void setupView() {
@@ -120,5 +120,13 @@ public abstract class BaseListActivity extends BaseActivity {
 
     protected void showSnackBar(String message) {
         Snackbar.make(mCoordinatorLayout, message, Snackbar.LENGTH_LONG).show();
+    }
+
+
+    protected void setToolBarTitle(String title) {
+        final ActionBar ab = getSupportActionBar();
+        if (ab != null) {
+            ab.setTitle(title);
+        }
     }
 }

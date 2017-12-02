@@ -17,7 +17,7 @@ public interface DbTransaction<Model extends RealmObject> {
 
     void deleteData();
 
-    void deleteModel(String permalink);
+    void deleteModel(int id);
 
     Realm getRealm();
 

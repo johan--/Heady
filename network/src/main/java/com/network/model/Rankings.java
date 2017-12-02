@@ -3,6 +3,7 @@ package com.network.model;
 import io.realm.RealmList;
 import io.realm.RealmObject;
 import io.realm.annotations.Ignore;
+import io.realm.annotations.Index;
 import io.realm.annotations.PrimaryKey;
 
 /**
@@ -14,5 +15,6 @@ public class Rankings extends RealmObject {
     public static final String RANKING = "ranking";
     @PrimaryKey
     public String ranking;
+    @Ignore
     public RealmList<Products> products;
 }

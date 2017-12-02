@@ -1,6 +1,6 @@
 package com.heady.activity;
 
-import android.content.Context;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,30 +13,29 @@ import com.heady.adapter.ProductsAdapter;
 import com.heady.util.logger.Log;
 import com.heady.util.realm.CategoryManager;
 import com.heady.util.realm.DbType;
-import com.heady.util.realm.RankingManager;
 import com.network.model.Categories;
 import com.network.model.Products;
 
 import java.util.List;
 
-import io.realm.RealmList;
+import io.realm.RealmResults;
 
 /**
  * Created by Yogi.
  */
 
-public class MainActivity extends BaseListActivity {
-    private RealmList<Products> mProductList;
-    private RankingManager rankingManager;
+public class ProductListActivity extends BaseListActivity {
+    private RealmResults<Products> mProductList;
     private CategoryManager categoryManager;
     private int sortCheckedItem = -1;
     private int categoryId;
+    private ProductsAdapter mAdapter;
 
-    public static void start(Context context, int categoryId) {
-        if (!(context instanceof MainActivity)) {
-            Intent intent = new Intent(context, MainActivity.class);
+    public static void start(Activity activity, int categoryId) {
+        if (!(activity instanceof ProductListActivity)) {
+            Intent intent = new Intent(activity, ProductListActivity.class);
             intent.putExtra(Categories.ID, categoryId);
-            context.startActivity(intent);
+            activity.startActivity(intent);
         }
     }
 
@@ -52,16 +51,22 @@ public class MainActivity extends BaseListActivity {
 
     @Override
     protected void setupRealm() {
-        rankingManager = new RankingManager(DbType.Heady.RANKING);
         categoryManager = new CategoryManager(DbType.Heady.CATEGORIES);
-        mProductList = categoryManager.getCategoryProducts(categoryId);
+        if (categoryId != -1) {
+            mProductList = categoryManager.getCategoryProducts(categoryId);
+            setToolBarTitle(categoryManager.findModel(categoryId).name);
+        } else {
+            mProductList = categoryManager.getAllProducts();
+            setToolBarTitle("All Products");
+        }
     }
 
     @Override
     protected void setupAdapter() {
         if (mProductList != null && mProductList.size() > 0) {
             hideProgress();
-            mRecyclerView.setAdapter(new ProductsAdapter(mProductList));
+            mAdapter = new ProductsAdapter(mProductList);
+            mRecyclerView.setAdapter(mAdapter);
         } else {
             setEmptyViewData("No Products found under this Category", R.drawable.ic_placeholder);
         }
@@ -77,6 +82,7 @@ public class MainActivity extends BaseListActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_home, menu);
+        menu.findItem(R.id.action_sort).setVisible(categoryId == -1);
         return true;
     }
 
@@ -93,18 +99,31 @@ public class MainActivity extends BaseListActivity {
     private void showSortDialog() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Sort By");
-        final List<String> rankingTitles = rankingManager.getRankingTitles();
+        final List<String> rankingTitles = categoryManager.getRankingTitles();
         CharSequence[] array = new CharSequence[rankingTitles.size()];
         rankingTitles.toArray(array);
         builder.setSingleChoiceItems(array, sortCheckedItem, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int i) {
                 sortCheckedItem = i;
-                Log.e(rankingTitles.get(i));
                 dialog.dismiss();
-//                mProductList = categoryManager.getProductsSorted("");
-//                mAdapter.notifyDataSetChanged();
-                // TODO: 27/11/2017  
+                // TODO: 3/12/17 update logic later
+                switch (i) {
+                    case 0:
+                        mProductList = categoryManager.getProductsSorted("viewCount");
+                        break;
+                    case 1:
+                        mProductList = categoryManager.getProductsSorted("orderCount");
+                        break;
+                    case 2:
+                        mProductList = categoryManager.getProductsSorted("shares");
+                        break;
+                }
+                if (mAdapter != null && mProductList != null) {
+                    Log.e(mProductList.size());
+                    mAdapter.updateData(mProductList);
+                    mAdapter.notifyDataSetChanged();
+                }
             }
         });
 

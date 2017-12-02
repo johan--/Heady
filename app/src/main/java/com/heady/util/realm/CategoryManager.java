@@ -2,12 +2,11 @@ package com.heady.util.realm;
 
 import android.support.annotation.NonNull;
 
-import com.heady.adapter.model.Category;
-import com.heady.adapter.model.SubCategory;
-import com.heady.util.logger.Log;
 import com.network.model.Categories;
 import com.network.model.Products;
+import com.network.model.Rankings;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.realm.Realm;
@@ -39,17 +38,21 @@ public class CategoryManager extends Manager<Categories> {
                 realm.copyToRealmOrUpdate(data);
             }
         });
-        setExpandableList();
     }
 
     @Override
-    public void setData(Categories data) {
-
+    public void setData(final Categories data) {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(@NonNull Realm realm) {
+                realm.copyToRealmOrUpdate(data);
+            }
+        });
     }
 
     @Override
-    public Categories findModel(int permalink) {
-        return realm.where(Categories.class).equalTo(Categories.ID, permalink).findFirst();
+    public Categories findModel(int id) {
+        return realm.where(Categories.class).equalTo(Categories.ID, id).findFirst();
     }
 
     @Override
@@ -63,8 +66,13 @@ public class CategoryManager extends Manager<Categories> {
     }
 
     @Override
-    public void deleteModel(String permalink) {
-
+    public void deleteModel(final int id) {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(@NonNull Realm realm) {
+                realm.where(Categories.class).equalTo(Categories.ID, id).findFirst().deleteFromRealm();
+            }
+        });
     }
 
     @Override
@@ -72,63 +80,99 @@ public class CategoryManager extends Manager<Categories> {
         return getRealmConfiguration(DbType.Heady.CATEGORIES);
     }
 
+    //-----------------------Custom Queries------------------//
+
+    /**
+     * @return all products
+     */
     public RealmResults<Products> getAllProducts() {
         return realm.where(Products.class).findAll();
     }
 
-    public RealmList<Products> getCategoryProducts(int id) {
+    public Products findProduct(int id) {
+        return realm.where(Products.class).equalTo(Products.ID, id).findFirst();
+    }
+
+    /**
+     * @return all products
+     */
+    public RealmResults<Products> getSelectedProducts(List<Integer> list) {
+        Integer[] integers = new Integer[list.size()];
+        list.toArray(integers);
+        return realm.where(Products.class).in(Products.ID, integers).findAll();
+    }
+
+    /**
+     * @param id category id
+     * @return Product list of single category
+     */
+    public RealmResults<Products> getCategoryProducts(int id) {
         Categories first = realm.where(Categories.class).equalTo(Categories.ID, id).findFirst();
         if (first != null) {
-            return first.products;
+            return first.products.where().findAll();
         }
         return null;
     }
 
     public RealmResults<Products> getProductsSorted(String column) {
-        RealmQuery<Products> where = realm.where(Products.class);
-        return where.findAllSortedAsync("viewCount", Sort.ASCENDING);
+        return realm.where(Products.class).findAllSortedAsync(column, Sort.DESCENDING);
     }
 
-    private String findCategoryName(int id) {
-        return findModel(id).name;
-    }
-
-    private void setExpandableList() {
-        try {
-            final RealmList<Category> categoryRealmList = new RealmList<>();
-
-            RealmResults<Categories> data = getData();
-            for (int i = 0; i < data.size(); i++) {
-                RealmList<SubCategory> subCategoryList = new RealmList<>();
-                RealmList<Integer> childCategories = data.get(i).childCategories;
-                for (int j = 0; j < childCategories.size(); j++) {
-                    String catName = findCategoryName(childCategories.get(j));
-                    SubCategory subCategory = new SubCategory(childCategories.get(j), catName);
-                    subCategoryList.add(subCategory);
-                }
-                Category category = new Category(data.get(i).id, data.get(i).name, subCategoryList);
-                categoryRealmList.add(category);
-            }
-
-            realm.executeTransaction(new Realm.Transaction() {
-                @Override
-                public void execute(@NonNull Realm realm) {
-                    for (Category recipe : categoryRealmList) {
-                        Category realmRecipe = realm.where(Category.class).equalTo(Categories.ID, recipe.getId()).findFirst();
-                        if (realmRecipe != null) {
-                            recipe.setExpanded(realmRecipe.isExpanded());
-                        }
-                    }
-                    realm.insertOrUpdate(categoryRealmList);
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.e("Error in saving expandable list data");
+    /**
+     * @return All Sub categories ids
+     */
+    private List<Integer> getAllSubCategories() {
+        RealmResults<Categories> categories = realm.where(Categories.class).findAll();
+        List<Integer> list = new ArrayList<>();
+        for (int i = 0; i < categories.size(); i++) {
+            RealmList<Integer> childCategories = categories.get(i).childCategories;
+            list.addAll(childCategories);
         }
+        return list;
     }
 
-    public RealmResults<Category> getExpandableList() {
-        return realm.where(Category.class).findAll();
+    /**
+     * @return Main Categories which don't have parent categories
+     */
+    public RealmResults<Categories> getMainCategories() {
+        List<Integer> list = getAllSubCategories();
+        RealmQuery<Categories> q = realm.where(Categories.class);
+        for (int i = 0; i < list.size(); i++) {
+            q = q.notEqualTo(Categories.ID, list.get(i));
+        }
+        return q.findAll();
+    }
+
+    /**
+     * @param id category id
+     * @return Sub categories of Single Category
+     */
+    public List<Integer> getSubCategories(int id) {
+        Categories first = realm.where(Categories.class).equalTo(Categories.ID, id).findFirst();
+        return first != null && first.childCategories != null && first.childCategories.size() > 0 ? first.childCategories : null;
+    }
+
+    /**
+     * @param list of sub categories ids
+     * @return Categories of respective sub categories
+     */
+    public RealmResults<Categories> getCategories(List<Integer> list) {
+        Integer[] integers = new Integer[list.size()];
+        list.toArray(integers);
+        RealmQuery<Categories> q = realm.where(Categories.class).in(Categories.ID, integers);
+        return q.findAll();
+    }
+
+
+    public List<String> getRankingTitles() {
+        RealmResults<Rankings> rankingsList = realm.where(Rankings.class).findAll();
+        List<String> titles = new ArrayList<>();
+        if (rankingsList == null) {
+            return titles;
+        }
+        for (int i = 0; i < rankingsList.size(); i++) {
+            titles.add(rankingsList.get(i).ranking);
+        }
+        return titles;
     }
 }

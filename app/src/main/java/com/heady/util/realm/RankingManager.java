@@ -2,6 +2,7 @@ package com.heady.util.realm;
 
 import android.support.annotation.NonNull;
 
+import com.network.model.Products;
 import com.network.model.Rankings;
 
 import java.util.ArrayList;
@@ -26,11 +27,6 @@ public class RankingManager extends Manager<Rankings> {
     }
 
     @Override
-    public void setData(Rankings data) {
-
-    }
-
-    @Override
     public void setData(final List<Rankings> data) {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
@@ -38,6 +34,11 @@ public class RankingManager extends Manager<Rankings> {
                 realm.copyToRealmOrUpdate(data);
             }
         });
+    }
+
+    @Override
+    public void setData(Rankings data) {
+
     }
 
     @Override
@@ -56,7 +57,7 @@ public class RankingManager extends Manager<Rankings> {
     }
 
     @Override
-    public void deleteModel(String permalink) {
+    public void deleteModel(int id) {
 
     }
 
@@ -90,5 +91,10 @@ public class RankingManager extends Manager<Rankings> {
             titles.add(rankingsList.get(i).ranking);
         }
         return titles;
+    }
+
+    public List<Products> getCategories(String permalink) {
+        Rankings first = realm.where(Rankings.class).equalTo(Rankings.RANKING, permalink).findFirst();
+        return first != null && first.products != null && first.products.size() > 0 ? first.products : null;
     }
 }

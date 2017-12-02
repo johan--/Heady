@@ -7,8 +7,8 @@ import com.chad.library.adapter.base.BaseViewHolder;
 import com.heady.R;
 import com.network.model.Products;
 
-import io.realm.RealmList;
 import io.realm.RealmRecyclerViewAdapter;
+import io.realm.RealmResults;
 
 /**
  * Created by Yogi.
@@ -16,7 +16,7 @@ import io.realm.RealmRecyclerViewAdapter;
 
 public class ProductsAdapter extends RealmRecyclerViewAdapter<Products, BaseViewHolder> {
 
-    public ProductsAdapter(@Nullable RealmList<Products> realmResults) {
+    public ProductsAdapter(@Nullable RealmResults<Products> realmResults) {
         super(R.layout.item_product, realmResults, Products.ID);
     }
 
